@@ -1,3 +1,4 @@
-<h1> PLAY.KROTJE.NL Server Plugins </h1>
-
-<h3> I have decided to open source all plugins created for the server I am planning on reviving. I have removed the entire codebase several times now, this time is it. Old code may be published at some point too, though, for now, this will do. </br> PS: code is on the way.</h3>
+# As of now, the server is undergoing maintenance. 
+### If you somehow found yourself on this page, consider yourself lucky, because this is soon going to be a part of the eternal past. 
+### The current server can be found at (whenever it is online, unpredictable due to maintenance as of now) mc.moondynasty.space; it runs on 1.18.2 and up, for Java edition only. It requires a premium Minecraft account. 
+### All code for the server that is not considered classified will be available here. Code is improved throughout time, and what is visible here is not meant to ressemble the true quality of the production in question.
