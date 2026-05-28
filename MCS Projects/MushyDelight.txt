@@ -1,0 +1,3 @@
+Information: This plugin aims at introducing more uses for the regular mushrooms by overriding default game mechanics introducing unique reactivity at the hand of specific interactivity. Eat, grow, cook or snort mushrooms, be free. This plugin will also allow me to touch upon mycology, as some details will have to be accurate. The plugin will grow as time moves on, for now, the aim is to make edible mushrooms a thing.
+
+Thu May 28th 2026 - 4:20AM: After hitting my head against my screen for an entire hour or perhaps even two, I finally seem to have managed to get it to compile. This denotes the start of this project MushyDelight or DelightfulFungi :)
