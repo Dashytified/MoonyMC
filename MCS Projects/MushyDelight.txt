@@ -2,3 +2,4 @@ Information: This plugin aims at introducing more uses for the regular mushrooms
 
 Thu May 28th 2026 - 4:20AM: After hitting my head against my screen for an entire hour or perhaps even two, I finally seem to have managed to get it to compile. This denotes the start of this project MushyDelight or DelightfulFungi :)
 Sun May 31st 2026 - 1:05AM: Have put together quite a bit of antics as of now, may come back to finish it later. Definitively made some good progress. Enlisted many features for my future self to enjoy. Mushrooms shall be for anyone.
+Sun May 31st 2026 - 5:54AM: Quite a lot has happened inbetween of me starting with this project and now having finished the first version. The first version of Mushy Delight allows you to eat mushrooms, raw! For now the version shall remain 4.2, eventually I will have to come up with a way to combine personal meaning with productional accuracy.
