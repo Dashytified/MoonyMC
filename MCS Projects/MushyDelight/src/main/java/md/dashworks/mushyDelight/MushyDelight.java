@@ -1,13 +1,13 @@
 package md.dashworks.mushyDelight;
 
-import org.bukkit.Material;
+import org.bukkit.*;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,15 +17,15 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public final class MushyDelight extends JavaPlugin
+final public class MushyDelight extends JavaPlugin
 {
-    public class MycelialListener implements Listener
+    static class MycelialListener implements Listener
     {
-        private final Set<Material> MUSH_EAT_MATERIALS = Set.of( Material.MUSHROOM_STEW, Material.RED_MUSHROOM, Material.BROWN_MUSHROOM, Material.CRIMSON_FUNGUS, Material.WARPED_FUNGUS );
-        private final Set<UUID> MUSH_EAT_COOLDOWN_CACHE = new HashSet<>();
-        private final long MUSH_EAT_COOLDOWN_TICKS = 20;
+        final Set<Material> MUSH_EAT_MATERIALS = Set.of( Material.MUSHROOM_STEW, Material.RED_MUSHROOM, Material.BROWN_MUSHROOM, Material.CRIMSON_FUNGUS, Material.WARPED_FUNGUS );
+        final Set<UUID> MUSH_EAT_COOLDOWN_CACHE = new HashSet<>();
+        final long MUSH_EAT_COOLDOWN_TICKS = 40;
 
-        public boolean isPlayerFungiEligible(final PlayerInteractEvent event)
+        boolean isPlayerFungiEligible(final PlayerInteractEvent event)
         {
             final Action action = event.getAction();
 
@@ -40,15 +40,20 @@ public final class MushyDelight extends JavaPlugin
 
             final ItemStack item = event.getItem();
 
-            return item != null && MUSH_EAT_MATERIALS.contains(item.getType());
+            if (item == null || MUSH_EAT_MATERIALS.contains(item.getType()))
+                return false;
+
+            final Player player = event.getPlayer();
+
+            return player.getFoodLevel() < 20 && player.getGameMode() != GameMode.CREATIVE;
         }
 
-        public boolean isPlayerOnFungiEatCooldown(final UUID uuid)
+        boolean isPlayerOnFungiEatCooldown(final UUID uuid)
         {
             return MUSH_EAT_COOLDOWN_CACHE.contains(uuid);
         }
 
-        public void removePLayerFungiItem(final PlayerInteractEvent event)
+        void removePLayerFungiItem(final PlayerInteractEvent event)
         {
             final ItemStack item = event.getItem();
 
@@ -69,14 +74,9 @@ public final class MushyDelight extends JavaPlugin
             {
                 inventory.setItemInMainHand(null);
             }
-
-            // - spawn nom particles at player mouth, as with food, for 10 ticks
-            // - spawn nom sounds at player mouth, for 10 ticks
-            // - spawn sphere of white particles around player, 3 blocks away
-            // - remove the consumed item
         }
 
-        public void setFungiEatPlayerCooldown(final UUID uuid)
+        void setFungiEatPlayerCooldown(final UUID uuid)
         {
             MUSH_EAT_COOLDOWN_CACHE.add(uuid);
 
@@ -88,8 +88,69 @@ public final class MushyDelight extends JavaPlugin
                 }
             };
 
-            runnable.runTaskLater(MushyDelight.plugin, MUSH_EAT_COOLDOWN_TICKS);
+            runnable.runTaskLater(plugin, MUSH_EAT_COOLDOWN_TICKS);
         }
+
+        BukkitRunnable getNomParticleRunnable(final Player player)
+        {
+            final PlayerInventory inventory = player.getInventory();
+            final Material material = inventory.getItemInMainHand().getType();
+
+            final BlockData particle1BlockData = Bukkit.createBlockData(Material.BROWN_MUSHROOM_BLOCK);
+            final BlockData particle2BlockData = Bukkit.createBlockData(Material.RED_MUSHROOM_BLOCK);
+
+            return new BukkitRunnable()
+            {
+                int currentTick = 0, maximumTicks = 12;
+
+                @Override public void run()
+                {
+                    if (!player.isOnline())
+                    {
+                        cancel();
+
+                        return;
+                    }
+
+                    else if (currentTick++ >= maximumTicks)
+                    {
+                        final int currentLevel = player.getFoodLevel();
+
+                        if (currentLevel < 20)
+                        {
+                            final int newLevel = Math.min(currentLevel + 5, 20);
+
+                            player.setFoodLevel(newLevel);
+                            player.setSaturation(newLevel);
+                        }
+
+                        cancel();
+
+                        return;
+                    }
+
+                    else
+                    {
+                        final ItemStack current = inventory.getItemInMainHand();
+
+                        if (current.getType() != material)
+                        {
+                            cancel();
+
+                            return;
+                        }
+                    }
+
+                    final Location eyeEatLocation = player.getEyeLocation().subtract(0, 0.25, 0);
+                    final World world = eyeEatLocation.getWorld();
+
+                    world.spawnParticle(Particle.BLOCK_CRUMBLE, eyeEatLocation, 6, 0.08, 0.08, 0.08, 0, particle1BlockData);
+                    world.spawnParticle(Particle.BLOCK_CRUMBLE, eyeEatLocation, 6, 0.08, 0.08, 0.08, 0, particle2BlockData);
+
+                    world.playSound(eyeEatLocation, Sound.ENTITY_GENERIC_EAT, 0.9F, 1.0F);
+                }
+            };
+        };
 
         @EventHandler public void onPlayerInteract(final PlayerInteractEvent event)
         {
@@ -104,131 +165,15 @@ public final class MushyDelight extends JavaPlugin
 
             removePLayerFungiItem(event);
 
+            final BukkitRunnable playNomParticle = getNomParticleRunnable(player);
 
+            playNomParticle.runTaskTimer(plugin, 0, 3L);
 
             setFungiEatPlayerCooldown(uuid);
 
             event.setCancelled(true);
         }
     }
-
-    /*
-package com.example.fungi; // adjust package
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
-
-public class FungiConsumeListener implements Listener {
-
-    private final Plugin plugin;
-
-    public FungiConsumeListener(Plugin plugin) {
-        this.plugin = plugin;
-    }
-
-    @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        // Only care right-click main hand interactions
-        Action action = event.getAction();
-        if (action != Action.RIGHT_CLICK_AIR && action != Action.RIGHT_CLICK_BLOCK) return;
-        if (event.getHand() != EquipmentSlot.HAND) return;
-
-        Player player = event.getPlayer();
-        ItemStack item = event.getItem();
-        if (item == null) return;
-
-        // Replace this with your real eligibility check
-        if (!isPlayerFungiEligible(item)) return;
-
-        consumeFungiAndEffect(plugin, player, item.getType());
-    }
-
-    // Example eligibility (replace with your MUSH_EAT_MATERIALS check)
-    private boolean isPlayerFungiEligible(ItemStack item) {
-        Material t = item.getType();
-        return t == Material.RED_MUSHROOM || t == Material.BROWN_MUSHROOM
-                || t == Material.RED_MUSHROOM_BLOCK || t == Material.BROWN_MUSHROOM_BLOCK;
-    }
-
-    public static void consumeFungiAndEffect(final Plugin plugin, final Player player, final Material mushroomBlockMaterial) {
-        if (player == null) return;
-
-        // Remove one from main hand (immediate)
-        PlayerInventory inv = player.getInventory();
-        ItemStack hand = inv.getItemInMainHand();
-        if (hand == null || hand.getType().isAir()) return;
-        int newAmount = hand.getAmount() - 1;
-        if (newAmount > 0) {
-            hand.setAmount(newAmount);
-            inv.setItemInMainHand(hand);
-        } else {
-            inv.setItemInMainHand(null);
-        }
-
-        // Prepare block data for block-crack particles
-        final BlockData mushroomData;
-        try {
-            mushroomData = Bukkit.createBlockData(mushroomBlockMaterial);
-        } catch (IllegalArgumentException ex) {
-            // fallback to RED_MUSHROOM_BLOCK if provided material not valid
-            mushroomData = Bukkit.createBlockData(Material.RED_MUSHROOM_BLOCK);
-        }
-
-        // Mouth location: eye - ~0.6
-        final Location mouth = player.getEyeLocation().subtract(0, 0.6, 0);
-
-        // Play nom particles + sounds for 10 ticks (one tick per run)
-        new BukkitRunnable() {
-            int tick = 0;
-            final int max = 10;
-            @Override
-            public void run() {
-                if (tick++ >= max) {
-                    cancel();
-                    return;
-                }
-                // small block-crack bursts at mouth to mimic mushroom break bits
-                mouth.getWorld().spawnParticle(Particle.BLOCK_CRACK, mouth, 6, 0.08, 0.08, 0.08, 0, mushroomData);
-                // small smoke/crit to emphasize "nom"
-                mouth.getWorld().spawnParticle(Particle.SMOKE_NORMAL, mouth, 4, 0.10, 0.10, 0.10, 0.01);
-                mouth.getWorld().playSound(mouth, Sound.ENTITY_GENERIC_EAT, 0.9f, 1.0f);
-            }
-        }.runTaskTimer(plugin, 0L, 1L);
-
-        // Instant sphere of block-crack particles radius 3 around player
-        final double radius = 3.0;
-        final int points = 200; // density
-        Location center = player.getLocation().add(0, 1.0, 0); // torso center
-        for (int i = 0; i < points; i++) {
-            // uniformly sample sphere
-            double u = Math.random();
-            double v = Math.random();
-            double theta = 2 * Math.PI * u;
-            double phi = Math.acos(2 * v - 1);
-            double x = radius * Math.sin(phi) * Math.cos(theta);
-            double y = radius * Math.sin(phi) * Math.sin(theta);
-            double z = radius * Math.cos(phi);
-            Location spawn = center.clone().add(x, y, z);
-            // spawn a single block-crack particle using the mushroom block data
-            spawn.getWorld().spawnParticle(Particle.BLOCK_CRACK, spawn, 1, 0, 0, 0, 0, mushroomData);
-        }
-    }
-}
-    * */
 
     // Goals next time (After spawn plugin):
     // - Add config to this plugin, then conversely also to the spawn plugin; API should be made.
@@ -247,14 +192,15 @@ public class FungiConsumeListener implements Listener {
 
     @Override public void onEnable()
     {
-
         plugin = this;
 
         getServer().getPluginManager().registerEvents(new MycelialListener(), plugin);
+
+        getLogger().info("Plugin has been enabled :)");
     }
 
     @Override public void onDisable()
     {
-        
+        getLogger().warning("Plugin has been disabled, unfortunately :(");
     }
 }
