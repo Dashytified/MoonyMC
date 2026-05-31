@@ -31,4 +31,14 @@ tasks {
             expand(props)
         }
     }
+
+    jar {
+        // Set the destination directory (relative to project root)
+        // Example: "build/custom-builds"
+        destinationDirectory.set(file("C:\\Users\\Flooshie\\Desktop\\Occultism\\MoonyMC\\MCS Projects"))
+
+        // Optional: Change the archive file name
+        archiveFileName.set("MushyDelight-${project.version}.jar")
+    }
 }
+
