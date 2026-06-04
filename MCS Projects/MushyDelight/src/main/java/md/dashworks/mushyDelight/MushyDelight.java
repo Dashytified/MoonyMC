@@ -40,7 +40,7 @@ final public class MushyDelight extends JavaPlugin
 
             final ItemStack item = event.getItem();
 
-            if (item == null || MUSH_EAT_MATERIALS.contains(item.getType()))
+            if (item == null || !MUSH_EAT_MATERIALS.contains(item.getType()))
                 return false;
 
             final Player player = event.getPlayer();
@@ -176,6 +176,7 @@ final public class MushyDelight extends JavaPlugin
     }
 
     // Goals next time (After spawn plugin):
+    // - Mushroom should only be removed from the inventory when the particles are done particuling.
     // - Add config to this plugin, then conversely also to the spawn plugin; API should be made.
     // - I want mushrooms to be bone meal supportive.
     // - I also want mushrooms to have a chance at dropping when mobs are killed.
