@@ -200,8 +200,5 @@ final public class MushyDelight extends JavaPlugin
         getLogger().info("Plugin has been enabled :)");
     }
 
-    @Override public void onDisable()
-    {
-        getLogger().warning("Plugin has been disabled, unfortunately :(");
-    }
+    @Override public void onDisable() { getLogger().warning("Plugin has been disabled, unfortunately :("); }
 }

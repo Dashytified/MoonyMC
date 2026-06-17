@@ -3,9 +3,29 @@ description: $description
 prefix: DASHWORKS PLUGIN
 version: '${version}'
 
-main: md.dashworks.haumBaum
+main: md.dashworks.HaumBaum
 api-version: '26.2'
 load: POSTWORLD
 
 authors: [ Dash, Moon Dynasty ]
 website: https://dashiline.moondynasty.space
+
+# description, usage, permission, permission-message and aliases, if, omitted on purpose
+commands:
+  home-help:
+    aliases: [haumhelp, homehelp, helphome, helphaum]
+
+  go-home:
+    aliases: [gohome, home, wherehome, tphome, bringhome, haum]
+
+  list-homes:
+    aliases: [homes, listhomes, homelist, listingofhomes]
+
+  inspect-home:
+    aliases: [seehome, viewhome, homeof, seehomes]
+
+  delete-home:
+    aliases: [delhome, deletehome, delmyhome, dhome]
+
+  set-my-home:
+    aliases: [sethome, setmehome, setmyhome, shome]
