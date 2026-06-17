@@ -1,0 +1,11 @@
+name: HaumBaum
+description: $description
+prefix: DASHWORKS PLUGIN
+version: '${version}'
+
+main: md.dashworks.haumBaum
+api-version: '26.2'
+load: POSTWORLD
+
+authors: [ Dash, Moon Dynasty ]
+website: https://dashiline.moondynasty.space

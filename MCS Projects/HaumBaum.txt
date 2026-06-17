@@ -1,0 +1,4 @@
+Information: This plugin allows players to use commands like `/home` and `/sethome` with the intent to make travel more convenient, it also comes with various enhancement ordinary plugins overlook. C++ has made me necessary to do so.
+
+Jun 18th Thurs 2026 - 12:27AM: This marks the start of a new project, namely `HaumBaum`. This project will act as a gateway to a cascade of features that will be used across the Minecraft server it is made for. First session of working on this project shall entail the preparing of command handling for my future self.
+
