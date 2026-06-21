@@ -1,5 +1,6 @@
 package md.dashworks;
 
+import md.dashworks.api.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,8 +14,6 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
 
     @Override public void onEnable()
     {
-        plugin = this;
-
         getCommand("home-help"   ).setExecutor(this);
         getCommand("go-home"     ).setExecutor(this);
         getCommand("list-homes"  ).setExecutor(this);
@@ -27,28 +26,39 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
 
     private static class CommandHandlers
     {
-        public static boolean HomeHelp(final CommandSender sender, final String[] args) { return true; }
-        public static boolean GoHome(final CommandSender sender, final String[] args) { return true; }
-        public static boolean ListHomes(final CommandSender sender, final String[] args) { return true; }
-        public static boolean InspectHome(final CommandSender sender, final String[] args) { return true; }
-        public static boolean DeleteHome(final CommandSender sender, final String[] args) { return true; }
-        public static boolean SetMyHome(final CommandSender sender, final String[] args) { return true; }
+        public static boolean HomeHelp(final Player player, final String[] args)
+        {
+            // - Make this GUI look more compact
+            // - add this command
+            // - test it out
+
+            return true;
+        }
+        public static boolean GoHome(final Player player, final String[] args) { return true; }
+        public static boolean ListHomes(final Player player, final String[] args) { return true; }
+        public static boolean InspectHome(final Player player, final String[] args) { return true; }
+        public static boolean DeleteHome(final Player player, final String[] args) { return true; }
+        public static boolean SetMyHome(final Player player, final String[] args) { return true; }
     }
+
+    private final MoonyCore moon = new MoonyCore();
+    private final MoonLogger loggers = new MoonLogger();
+    private final MoonPlayers players = new MoonPlayers();
 
     @Override public boolean onCommand(final @NonNull CommandSender sender, final @NonNull Command command, final @NonNull String label, final @NonNull String[] args)
     {
-        if (!(sender instanceof Player)) getLogger().warning("Operation not yet supported by plugin");
+        final Player player = players.getPlayerFromCommandSender(sender);
 
-        final String command_id = command.getName().toLowerCase();
+        if (player == null) return false;
 
-        return switch (command_id)
+        return switch (command.getName().toLowerCase())
         {
-            case "home-help"    -> CommandHandlers.HomeHelp(sender, args);
-            case "go-home"      -> CommandHandlers.GoHome(sender, args);
-            case "list-homes"   -> CommandHandlers.ListHomes(sender, args);
-            case "inspect-home" -> CommandHandlers.InspectHome(sender, args);
-            case "delete-home"  -> CommandHandlers.DeleteHome(sender, args);
-            case "set-my-home"  -> CommandHandlers.SetMyHome(sender, args);
+            case "home-help"    -> CommandHandlers.HomeHelp(player, args);
+            case "go-home"      -> CommandHandlers.GoHome(player, args);
+            case "list-homes"   -> CommandHandlers.ListHomes(player, args);
+            case "inspect-home" -> CommandHandlers.InspectHome(player, args);
+            case "delete-home"  -> CommandHandlers.DeleteHome(player, args);
+            case "set-my-home"  -> CommandHandlers.SetMyHome(player, args);
             default             -> true;
         };
     }

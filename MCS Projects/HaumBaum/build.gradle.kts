@@ -1,3 +1,8 @@
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.invoke
+import org.gradle.kotlin.dsl.maven
+import org.gradle.kotlin.dsl.repositories
+
 plugins {
     id("java-library")
     id("xyz.jpenilla.run-paper") version "3.0.2"
@@ -10,6 +15,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.2.build.+")
+    implementation(files("../MoonyCore-API.jar"))
 }
 
 java {
@@ -31,4 +37,9 @@ tasks {
             expand(props)
         }
     }
+}
+
+tasks.named<Jar>("jar") {
+    destinationDirectory = file("C:/Users/Flooshie/Desktop/Occultism/MoonyMC/MCS Projects")
+    archiveFileName.set("HaumBaum.jar")
 }
