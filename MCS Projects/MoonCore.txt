@@ -1,0 +1,6 @@
+Information: This is the core API used by the Minecraft server to run all of my code. It is a single-handled all encompassing master of awesomeness. And of course, is 20% cooler.
+
+Jun 22th Mon 2026 - 1:02AM: I built the first version and managed to embed it within the upcoming project `HaumBaum` and am now trying to setup a workflow to make the other project `MushyDelight` work in harmony too.
+
+
+

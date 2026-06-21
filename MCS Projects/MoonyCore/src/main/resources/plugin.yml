@@ -1,0 +1,11 @@
+name: MoonyCore
+description: $description
+prefix: DASHWORKS PLUGIN
+version: '${version}'
+
+main: md.dashworks.api.MoonyCore
+api-version: '26.2'
+load: POSTWORLD
+
+authors: [Dash, Moon Dynasty]
+website: https://dashiline.moondynasty.space
