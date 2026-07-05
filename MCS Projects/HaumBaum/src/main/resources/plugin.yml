@@ -4,7 +4,7 @@ prefix: DASHWORKS PLUGIN
 version: '${version}'
 
 main: md.dashworks.HaumBaum
-api-version: '26.2'
+api-version: '26.1.2'
 load: POSTWORLD
 
 authors: [ Dash, Moon Dynasty ]

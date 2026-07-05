@@ -2,5 +2,7 @@ Information: This is the core API used by the Minecraft server to run all of my 
 
 Jun 22th Mon 2026 - 1:02AM: I built the first version and managed to embed it within the upcoming project `HaumBaum` and am now trying to setup a workflow to make the other project `MushyDelight` work in harmony too.
 
+Jul 6th Mon 2026 - 12:45AM: I added color translation for player messaging for once using the `Components` API I never wanted to touch :)
+ 
 
 
