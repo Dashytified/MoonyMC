@@ -1,12 +1,15 @@
 package md.dashworks;
 
 import md.dashworks.api.*;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
+
+import java.util.*;
 
 public final class HaumBaum extends JavaPlugin implements CommandExecutor
 {
@@ -27,56 +30,83 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
         getLogger().info("Plugin has bee enabled :)");
     }
 
-    public final MoonLogger loggers = new MoonLogger();
     public final MoonPlayers players = new MoonPlayers();
 
-    private static class CommandHandlers {
+    private class CommandHandlers
+    {
+        public final MoonPlayers players = new MoonPlayers();
+
         public static boolean HomeHelp(final Player player, final String[] args)
         {
             final String menu = """
-                    <rainbow>
-                    #####     ####    #####   #    #  IS THE GREATEST
-                    #    #   #    #  #        #    #   ALMIGHTY HORSE
-                    # )O( #  ######    ###    ######
-                    #    #   #    #        #  #    #
-                    #####    #    #   #####   #    #
-                    </rainbow>
-                    
-                    <green>
-                    home-help : Renders this help text menu
-                    go-home [name] : Go to one of your set homes
-                    list-homes : List the home(s) you have set
-                    inspect-home [player] [name | none] : Inspect a player's home at once (May not work for you)
-                    delete-home [name] : Delete one of your set homes
-                    set-my-home [name] : Set a home by name
-                    </green>
+                    <rainbow><italic>! The almighty horse came from far away</italic></rainbow>
+                    - <yellow>/home-help</yellow>  <green>:  Renders this help text menu</green>
+                    - <yellow>/go-home [name]</yellow>  <green>:  Go to one of your set homes</green>
+                    - <yellow>/list-homes</yellow>  <green>:  List the home(s) you have set</green>
+                    - <yellow>/inspect-home [player] [name | none]</yellow>  <green>:  Inspect a player's home at once (May not work for you)</green>
+                    - <yellow>/delete-home [name]</yellow>  <green>:  Delete one of your set homes</green>
+                    - <yellow>/set-my-home [name]</yellow>  <green>:  Set a home by name</green>
                     """;
 
             return instance.players.sendPlayerMessage(player, menu);
         }
 
-        public static boolean GoHome(final Player player, final String[] args)
+        private class PlayerHome
+        {
+            public String name;
+            public Location location;
+
+            public PlayerHome(final String name, final Location location)
+            {
+                this.name = name;
+                this.location = location;
+            }
+        }
+
+        // Startup  = LOAD
+        // Shutdown = SAVE
+        private final Map<UUID, List<PlayerHome>> homes = new HashMap<>();
+
+        public boolean GoHome(final Player player, final String[] args)
+        { return true; }
+
+        public boolean ListHomes(final Player player, final String[] args)
         {
             return true;
         }
 
-        public static boolean ListHomes(final Player player, final String[] args)
+        public boolean InspectHome(final Player player, final String[] args)
         {
             return true;
         }
 
-        public static boolean InspectHome(final Player player, final String[] args)
+        public boolean DeleteHome(final Player player, final String[] args)
         {
             return true;
         }
 
-        public static boolean DeleteHome(final Player player, final String[] args)
+        public boolean SetMyHome(final Player player, final String[] args)
         {
-            return true;
-        }
+            if (args.length != 2)
+            {
+                final UUID uuid = player.getUniqueId();
 
-        public static boolean SetMyHome(final Player player, final String[] args)
-        {
+                List<PlayerHome> homes = this.homes.containsKey(uuid) ? this.homes.get(uuid) : new ArrayList<>();
+
+                final String name = args[1].toLowerCase();
+                final Location location = player.getLocation();
+                final PlayerHome home = new PlayerHome(name, location);
+
+                homes.add(home);
+
+                this.homes.put(uuid, homes);
+            }
+
+            else
+            {
+                players.sendPlayerMessage(player, "<green>Usage: /set-my-home [name]</green>");
+            }
+
             return true;
         }
     }

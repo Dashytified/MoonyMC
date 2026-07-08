@@ -6,4 +6,6 @@ Jun 18th Thurs 2026 - 1:13AM: I have successfully prepared the project for my ne
 
 Jun 22th Mon 2026 - 1:02AM: I am proud to announce I have officially started developing the necessary `MoonyCore` API, which yet again, entails the start of yet another project. Still figuring out my workflow as there simply are a lot of variables to deal with, I managed to build working binaries already.
 
+Jul 9th Thur 2026 - 12:31AM: Today I bring nothing too significant for this beautiful project on first sight, but when considering the broader cascade of effects it plays into, it is indeed quite a synergy you are looking at. I created one function for the project, this implementation really just shows how easy it can be to write code, having been preoccupied with C++ code, this feels like I do not even have to think. It is pleasant, but also a reason why the regions of the brain involved quickly become redundant to the system operating them.
+
 
