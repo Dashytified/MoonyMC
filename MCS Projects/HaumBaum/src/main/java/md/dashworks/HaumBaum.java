@@ -11,14 +11,88 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
+class PlayerHomes
+{
+    private class PlayerHome
+    {
+        public String name;
+        public Location location;
+
+        public PlayerHome(final String name, final Location location)
+        {
+            this.name = name;
+            this.location = location;
+        }
+    }
+
+    private final Map<UUID, List<PlayerHome>> homes = new HashMap<>(); // <--- need a separate class for this
+    private final MoonyConferoo conferoo = new MoonyConferoo();
+
+    // loadPlayerHomes(JavaPlugin plugin);
+
+    // savePlayerHomes();
+}
+
 public final class HaumBaum extends JavaPlugin implements CommandExecutor
 {
     public static JavaPlugin plugin;
     public static HaumBaum instance;
+    public static PlayerHomes homes = new PlayerHomes();
 
     @Override public void onEnable()
     {
         plugin = instance = this;
+
+        saveDefaultConfig();
+
+        // loadPlayerHomes(plugin);
+
+        /* Example code
+        *
+            FileConfiguration cfg = getConfig();
+
+            String base = "players." + uuid + ".location";
+
+            String worldName = cfg.getString(base + ".world", null);
+            if (worldName == null) return; // no saved location for this UUID
+
+            World world = Bukkit.getWorld(worldName);
+            if (world == null) return;
+
+            double x = cfg.getDouble(base + ".x");
+            double y = cfg.getDouble(base + ".y");
+            double z = cfg.getDouble(base + ".z");
+
+            Location loc = new Location(world, x, y, z);
+        *
+        *
+        *
+            FileConfiguration cfg = getConfig();
+
+            ConfigurationSection players = cfg.getConfigurationSection("players");
+            if (players == null) return;
+
+            for (String uuidStr : players.getKeys(false)) {
+                UUID uuid = UUID.fromString(uuidStr);
+                // read base = "players." + uuidStr + ".location"
+            }
+        *
+        *
+        *
+            UUID uuid = player.getUniqueId();
+            Location loc = player.getLocation();
+
+            FileConfiguration cfg = getConfig();
+            String base = "players." + uuid + ".location";
+
+            cfg.set(base + ".world", loc.getWorld().getName());
+            cfg.set(base + ".x", loc.getX());
+            cfg.set(base + ".y", loc.getY());
+            cfg.set(base + ".z", loc.getZ());
+
+            saveConfig();
+        *
+        * */
 
         getCommand("home-help"   ).setExecutor(this);
         getCommand("go-home"     ).setExecutor(this);
@@ -30,13 +104,18 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
         getLogger().info("Plugin has bee enabled :)");
     }
 
-    public final MoonPlayers players = new MoonPlayers();
+    @Override public void onDisable()
+    {
+        // savePlayerHomes();
+
+        getLogger().warning("Plugin has been disabled, unfortunately :(");
+    }
 
     private class CommandHandlers
     {
-        public final MoonPlayers players = new MoonPlayers();
+        private final MoonPlayers players = new MoonPlayers();
 
-        public static boolean HomeHelp(final Player player, final String[] args)
+        public boolean HomeHelp(final Player player, final String[] args)
         {
             final String menu = """
                     <rainbow><italic>! The almighty horse came from far away</italic></rainbow>
@@ -51,50 +130,19 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
             return instance.players.sendPlayerMessage(player, menu);
         }
 
-        private class PlayerHome
-        {
-            public String name;
-            public Location location;
-
-            public PlayerHome(final String name, final Location location)
-            {
-                this.name = name;
-                this.location = location;
-            }
-        }
-
-        // Startup  = LOAD
-        // Shutdown = SAVE
-        private final Map<UUID, List<PlayerHome>> homes = new HashMap<>();
-
-        public boolean GoHome(final Player player, final String[] args)
-        { return true; }
-
-        public boolean ListHomes(final Player player, final String[] args)
-        {
-            return true;
-        }
-
-        public boolean InspectHome(final Player player, final String[] args)
-        {
-            return true;
-        }
-
-        public boolean DeleteHome(final Player player, final String[] args)
-        {
-            return true;
-        }
-
         public boolean SetMyHome(final Player player, final String[] args)
         {
             if (args.length != 2)
             {
                 final UUID uuid = player.getUniqueId();
 
+                // homeExists(uuid);
                 List<PlayerHome> homes = this.homes.containsKey(uuid) ? this.homes.get(uuid) : new ArrayList<>();
 
                 final String name = args[1].toLowerCase();
                 final Location location = player.getLocation();
+
+                // tryAddPlayerHome(uuid, name, location);
                 final PlayerHome home = new PlayerHome(name, location);
 
                 homes.add(home);
@@ -111,23 +159,25 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
         }
     }
 
+    private final MoonPlayers players = new MoonPlayers();
+
     @Override public boolean onCommand(final @NonNull CommandSender sender, final @NonNull Command command, final @NonNull String label, final @NonNull String[] args)
     {
         final Player player = players.getPlayerFromCommandSender(sender);
 
         if (player == null) return false;
 
+        final CommandHandlers handlers = new CommandHandlers();
+
         return switch (command.getName().toLowerCase())
         {
-            case "home-help"    -> CommandHandlers.HomeHelp(player, args);
-            case "go-home"      -> CommandHandlers.GoHome(player, args);
-            case "list-homes"   -> CommandHandlers.ListHomes(player, args);
-            case "inspect-home" -> CommandHandlers.InspectHome(player, args);
-            case "delete-home"  -> CommandHandlers.DeleteHome(player, args);
-            case "set-my-home"  -> CommandHandlers.SetMyHome(player, args);
+            case "home-help"    -> handlers.HomeHelp(player, args);
+            //case "go-home"      -> CommandHandlers.GoHome(player, args);
+            //case "list-homes"   -> CommandHandlers.ListHomes(player, args);
+            //case "inspect-home" -> CommandHandlers.InspectHome(player, args);
+            //case "delete-home"  -> CommandHandlers.DeleteHome(player, args);
+            case "set-my-home"  -> handlers.SetMyHome(player, args);
             default             -> true;
         };
     }
-
-    @Override public void onDisable() { getLogger().warning("Plugin has been disabled, unfortunately :("); }
 }
