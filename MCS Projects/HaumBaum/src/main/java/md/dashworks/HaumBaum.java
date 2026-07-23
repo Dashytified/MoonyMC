@@ -3,7 +3,6 @@ package md.dashworks;
 import md.dashworks.api.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -33,8 +32,8 @@ class PlayerHomes
     private final Map<UUID, List<PlayerHome>> homes = new HashMap<>(); // <--- need a separate class for this
 
     private final MoonConfiguration config = new MoonConfiguration();
-    private final MoonPlayers players      = new MoonPlayers();
-    private final MoonLogger logger        = new MoonLogger();
+    private final MoonPlayers players = new MoonPlayers();
+    private final MoonLogger logger = new MoonLogger();
 
     public void loadPlayerConfiguration(final JavaPlugin plugin)
     {
@@ -42,7 +41,7 @@ class PlayerHomes
 
         try
         {
-            final FileConfiguration config        = plugin.getConfig();
+            final FileConfiguration config = plugin.getConfig();
             final ConfigurationSection registered = config.getConfigurationSection("player-storage");
 
             if (registered == null) return;
@@ -61,7 +60,7 @@ class PlayerHomes
 
                 for (String entry : entries.getKeys(false))
                 {
-                    final String base       = "player-storage." + key  + "." + entry + ".";
+                    final String base = "player-storage." + key  + "." + entry + ".";
                     final String world_name = config.getString(base + "world-name");
 
                     if (world_name == null) continue;
@@ -77,7 +76,7 @@ class PlayerHomes
                     if (world == null) continue;
 
                     final Location location = new Location(world, world_x, world_y, world_z);
-                    final PlayerHome home   = new PlayerHome(entry, location);
+                    final PlayerHome home = new PlayerHome(entry, location);
 
                     homes.add(home);
                 }
@@ -95,13 +94,37 @@ class PlayerHomes
 
     public void savePlayerHomes(final JavaPlugin plugin)
     {
-        plugin.saveDefaultConfig();
+        //plugin.saveDefaultConfig();
 
         try
         {
             final FileConfiguration config = plugin.getConfig();
 
-            
+            config.set("player-storage", null);
+
+            for (Map.Entry<UUID, List<PlayerHome>> entry : this.homes.entrySet())
+            {
+                final UUID uuid = entry.getKey();
+                final List<PlayerHome> homes = entry.getValue();
+
+                ConfigurationSection section = config.createSection("player-storage." + uuid.toString());
+
+                for (PlayerHome home : homes)
+                {
+                    final String name = home.name;
+                    final String base = "player-storage." + uuid.toString() + "." + name + ".";
+
+                    config.set(base + "world-name", name);
+
+                    final Location location = home.location;
+
+                    config.set(base + "world-x",  location.getX());
+                    config.set(base + "world-y",  location.getY());
+                    config.set(base + "world-z",  location.getZ());
+                }
+            }
+
+            plugin.saveConfig();
         }
 
         catch (final Exception e)
