@@ -2,11 +2,14 @@ package md.dashworks.api;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.UUID;
 
 
 public class MoonPlayers
@@ -31,4 +34,28 @@ public class MoonPlayers
 
         return true;
     }
+
+    public UUID tryGetPlayerUUIDFromString(final String value, boolean hasPlayedBefore)
+    {
+        try
+        {
+            final UUID uuid = UUID.fromString(value);
+
+            if (hasPlayedBefore)
+            {
+                final OfflinePlayer player =  Bukkit.getOfflinePlayer(uuid);
+
+                if (!player.hasPlayedBefore()) return null;
+            }
+
+            return uuid;
+        }
+
+        catch (final IllegalArgumentException e)
+        {
+            return null;
+        }
+    }
+
+    public UUID tryGetPlayerUUIDFromString(final String value) {  return tryGetPlayerUUIDFromString(value, false); }
 }
