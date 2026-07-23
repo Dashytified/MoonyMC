@@ -28,4 +28,4 @@ commands:
     aliases: [delhome, deletehome, delmyhome, dhome]
 
   set-my-home:
-    aliases: [sethome, setmehome, setmyhome, shome]
+    aliases: [sethome, setmehome, setmyhome, shome, set-home]

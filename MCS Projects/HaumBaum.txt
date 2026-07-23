@@ -10,4 +10,4 @@ Jul 9th Thur 2026 - 12:31AM: Today I bring nothing too significant for this beau
 
 Jul 23rd Thur 2026 - 3:40PM: Glad to announce the save and load functionality for configuration has been implemented. It has been literal years since I last wrote it out, this time, properly. It should work as it is, but I have not yet compiled it nor tried the plugin on the server for that matter. The IDE does however not throw any errors for the relevant code. It does obviously pick up on the errors at the bottom of the primary source file `HaumBaum.java` because I have yet to implement those snippets.
 
-
+Jul 23rd Thur 2026 - 4:20PM: Have now written out the implementation for `/set-home`, this is some nice progress for now, do not want to spend too much time on progressing in regard to developing plugins, does not seem as rewarding as some of my other projects right now.
