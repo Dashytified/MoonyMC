@@ -1,10 +1,15 @@
 package md.dashworks;
 
 import md.dashworks.api.*;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jspecify.annotations.NonNull;
@@ -26,73 +31,98 @@ class PlayerHomes
     }
 
     private final Map<UUID, List<PlayerHome>> homes = new HashMap<>(); // <--- need a separate class for this
-    private final MoonyConferoo conferoo = new MoonyConferoo();
 
-    // loadPlayerHomes(JavaPlugin plugin);
+    private final MoonConfiguration config = new MoonConfiguration();
+    private final MoonPlayers players      = new MoonPlayers();
+    private final MoonLogger logger        = new MoonLogger();
 
-    // savePlayerHomes();
+    public void loadPlayerConfiguration(final JavaPlugin plugin)
+    {
+        plugin.saveDefaultConfig();
+
+        try
+        {
+            final FileConfiguration config        = plugin.getConfig();
+            final ConfigurationSection registered = config.getConfigurationSection("player-storage");
+
+            if (registered == null) return;
+
+            for (String key : registered.getKeys(false))
+            {
+                final UUID uuid = players.tryGetPlayerUUIDFromString(key);
+
+                if (uuid == null) continue;
+
+                final ConfigurationSection entries = config.getConfigurationSection("player-storage." + key);
+
+                if (entries == null) continue;
+
+                final List<PlayerHome> homes = new ArrayList<>();
+
+                for (String entry : entries.getKeys(false))
+                {
+                    final String base       = "player-storage." + key  + "." + entry + ".";
+                    final String world_name = config.getString(base + "world-name");
+
+                    if (world_name == null) continue;
+
+                    final double world_x = config.getDouble(base + "world-x", -1);
+                    final double world_y = config.getDouble(base + "world-y", -1);
+                    final double world_z = config.getDouble(base + "world-z", -1);
+
+                    if (world_x == -1 && world_y == -1 && world_z == -1) continue;
+
+                    final World world = Bukkit.getWorld(world_name);
+
+                    if (world == null) continue;
+
+                    final Location location = new Location(world, world_x, world_y, world_z);
+                    final PlayerHome home   = new PlayerHome(entry, location);
+
+                    homes.add(home);
+                }
+
+                this.homes.put(uuid, homes);
+            }
+        }
+
+        catch (final Exception e)
+        {
+            logger.log_warning("[-] An exception was thrown whilst loading player configurations for HaumBaum.");
+        }
+    }
+
+
+    public void savePlayerHomes(final JavaPlugin plugin)
+    {
+        plugin.saveDefaultConfig();
+
+        try
+        {
+            final FileConfiguration config = plugin.getConfig();
+
+            
+        }
+
+        catch (final Exception e)
+        {
+            logger.log_warning("[-] An exception was thrown whilst saving player configurations for HaumBaum.");
+        }
+    }
 }
 
 public final class HaumBaum extends JavaPlugin implements CommandExecutor
 {
     public static JavaPlugin plugin;
     public static HaumBaum instance;
-    public static PlayerHomes homes = new PlayerHomes();
+
+    private final static PlayerHomes homes = new PlayerHomes();
 
     @Override public void onEnable()
     {
         plugin = instance = this;
 
-        saveDefaultConfig();
-
-        // loadPlayerHomes(plugin);
-
-        /* Example code
-        *
-            FileConfiguration cfg = getConfig();
-
-            String base = "players." + uuid + ".location";
-
-            String worldName = cfg.getString(base + ".world", null);
-            if (worldName == null) return; // no saved location for this UUID
-
-            World world = Bukkit.getWorld(worldName);
-            if (world == null) return;
-
-            double x = cfg.getDouble(base + ".x");
-            double y = cfg.getDouble(base + ".y");
-            double z = cfg.getDouble(base + ".z");
-
-            Location loc = new Location(world, x, y, z);
-        *
-        *
-        *
-            FileConfiguration cfg = getConfig();
-
-            ConfigurationSection players = cfg.getConfigurationSection("players");
-            if (players == null) return;
-
-            for (String uuidStr : players.getKeys(false)) {
-                UUID uuid = UUID.fromString(uuidStr);
-                // read base = "players." + uuidStr + ".location"
-            }
-        *
-        *
-        *
-            UUID uuid = player.getUniqueId();
-            Location loc = player.getLocation();
-
-            FileConfiguration cfg = getConfig();
-            String base = "players." + uuid + ".location";
-
-            cfg.set(base + ".world", loc.getWorld().getName());
-            cfg.set(base + ".x", loc.getX());
-            cfg.set(base + ".y", loc.getY());
-            cfg.set(base + ".z", loc.getZ());
-
-            saveConfig();
-        *
-        * */
+        homes.loadPlayerConfiguration(this);
 
         getCommand("home-help"   ).setExecutor(this);
         getCommand("go-home"     ).setExecutor(this);
