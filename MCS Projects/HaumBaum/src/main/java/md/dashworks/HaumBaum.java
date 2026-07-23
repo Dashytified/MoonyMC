@@ -132,6 +132,47 @@ class PlayerHomes
             logger.log_warning("[-] An exception was thrown whilst saving player configurations for HaumBaum.");
         }
     }
+
+    public boolean hasPlayerSetHomes(final UUID uuid) { return homes.containsKey(uuid) && !homes.get(uuid).isEmpty(); }
+
+    public boolean doesPlayerHomeExist(final UUID uuid, final String name)
+    {
+        if (!hasPlayerSetHomes(uuid)) return false;
+
+        final List<PlayerHome> homes = this.homes.get(uuid);
+
+        for (PlayerHome home : homes)
+            if (home.name.equals(name)) return true;
+
+        return false;
+    }
+
+    public int getPlayerHomesCount(final UUID uuid) { return hasPlayerSetHomes(uuid) ? this.homes.get(uuid).size() : 0; }
+
+    public boolean trySetPlayerHome(final Player player, final String name)
+    {
+        try
+        {
+            if (name == null) return false;
+
+            String treated = name.trim().replaceAll("[^A-Za-z0-9_-]", "");
+
+            if (treated.isEmpty()) return false;
+
+            final UUID uuid = player.getUniqueId();
+            final Location location = player.getLocation();
+            final PlayerHome home = new PlayerHome(name, location);
+
+            homes.computeIfAbsent(uuid, x -> new ArrayList<>()).add(home);
+        }
+
+        catch (Exception e)
+        {
+            return false;
+        }
+
+        return true;
+    }
 }
 
 public final class HaumBaum extends JavaPlugin implements CommandExecutor
@@ -159,7 +200,7 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
 
     @Override public void onDisable()
     {
-        // savePlayerHomes();
+        homes.savePlayerHomes(this);
 
         getLogger().warning("Plugin has been disabled, unfortunately :(");
     }
@@ -168,20 +209,7 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
     {
         private final MoonPlayers players = new MoonPlayers();
 
-        public boolean HomeHelp(final Player player, final String[] args)
-        {
-            final String menu = """
-                    <rainbow><italic>! The almighty horse came from far away</italic></rainbow>
-                    - <yellow>/home-help</yellow>  <green>:  Renders this help text menu</green>
-                    - <yellow>/go-home [name]</yellow>  <green>:  Go to one of your set homes</green>
-                    - <yellow>/list-homes</yellow>  <green>:  List the home(s) you have set</green>
-                    - <yellow>/inspect-home [player] [name | none]</yellow>  <green>:  Inspect a player's home at once (May not work for you)</green>
-                    - <yellow>/delete-home [name]</yellow>  <green>:  Delete one of your set homes</green>
-                    - <yellow>/set-my-home [name]</yellow>  <green>:  Set a home by name</green>
-                    """;
-
-            return instance.players.sendPlayerMessage(player, menu);
-        }
+        public boolean HomeHelp(final Player player, final String[] args) { return instance.players.sendPlayerMessage(player, "<rainbow>/home-help  /go-home <italic>[name]</italic>  /list-homes  /inspect-home <italic>[player] [name | none]</italic>  /delete-home <italic>[name]</italic>  /set-my-home <italic>[name]</italic></rainbow>"); }
 
         public boolean SetMyHome(final Player player, final String[] args)
         {
@@ -189,18 +217,15 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
             {
                 final UUID uuid = player.getUniqueId();
 
-                // homeExists(uuid);
-                List<PlayerHome> homes = this.homes.containsKey(uuid) ? this.homes.get(uuid) : new ArrayList<>();
+                if (homes.getPlayerHomesCount(uuid) >= 2 && !player.isOp()) players.sendPlayerMessage(player, "<red>You may not set any more homes.</red>");
 
-                final String name = args[1].toLowerCase();
-                final Location location = player.getLocation();
+                else if (args[1].length() < 2) players.sendPlayerMessage(player, "<red>Your home name must be more than 2 characters long.</red>");
 
-                // tryAddPlayerHome(uuid, name, location);
-                final PlayerHome home = new PlayerHome(name, location);
+                else if (args[1].length() > 12) players.sendPlayerMessage(player, "<red>Your home name may not be any longer than 12 characters.</red>");
 
-                homes.add(home);
+                else if (homes.trySetPlayerHome(player, args[1])) players.sendPlayerMessage(player, "<green>Your home has been set to your current location.</green>");
 
-                this.homes.put(uuid, homes);
+                else players.sendPlayerMessage(player, "<red>Could not process the setting of the by you requested home.</red>");
             }
 
             else
