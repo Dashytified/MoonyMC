@@ -58,7 +58,7 @@ class PlayerHomes
 
                 for (String entry : entries.getKeys(false))
                 {
-                    final String base = "player-storage." + key  + "." + entry + ".";
+                    final String base = "player-storage." + key + "." + entry + ".";
                     final String world_name = config.getString(base + "world-name");
 
                     if (world_name == null) continue;
@@ -71,12 +71,13 @@ class PlayerHomes
 
                     final World world = Bukkit.getWorld(world_name);
 
-                    if (world == null) continue;
+                    if (world != null)
+                    {
+                        final Location location = new Location(world, world_x, world_y, world_z);
+                        final PlayerHome home = new PlayerHome(entry, location);
 
-                    final Location location = new Location(world, world_x, world_y, world_z);
-                    final PlayerHome home = new PlayerHome(entry, location);
-
-                    homes.add(home);
+                        homes.add(home);
+                    }
                 }
 
                 this.homes.put(uuid, homes);
@@ -133,11 +134,26 @@ class PlayerHomes
 
     public boolean hasPlayerSetHomes(final UUID uuid) { return homes.containsKey(uuid) && !homes.get(uuid).isEmpty(); }
 
-    public boolean doesPlayerHomeExist(final UUID uuid, final String name)
+    public String getPlayerHomesAsString(final UUID uuid)
+    {
+        if (!hasPlayerSetHomes(uuid)) return "<green>No homes were found</green>";
+
+        final List<PlayerHome> homes = this.homes.get(uuid);
+
+        String homeString = "<green>Your homes: <italic>";
+
+        for (PlayerHome home : homes) homeString += home.name + "  ";
+
+        return homeString + "</italic></green>";
+    }
+
+    public boolean doesPlayerHomeExist(final UUID uuid, String name)
     {
         if (!hasPlayerSetHomes(uuid)) return false;
 
         final List<PlayerHome> homes = this.homes.get(uuid);
+
+        name = name.toLowerCase();
 
         for (PlayerHome home : homes)
             if (home.name.equals(name)) return true;
@@ -153,13 +169,13 @@ class PlayerHomes
         {
             if (name == null) return false;
 
-            String treated = name.trim().replaceAll("[^A-Za-z0-9_-]", "");
+           final String treated = name.trim().replaceAll("[^A-Za-z0-9_-]", "");
 
             if (treated.isEmpty()) return false;
 
             final UUID uuid = player.getUniqueId();
             final Location location = player.getLocation();
-            final PlayerHome home = new PlayerHome(name, location);
+            final PlayerHome home = new PlayerHome(name.toLowerCase(), location);
 
             homes.computeIfAbsent(uuid, x -> new ArrayList<>()).add(home);
         }
@@ -247,10 +263,40 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
                 }
             }
 
-            else
+            else players.sendPlayerMessage(player, "<green>Usage: /set-my-home <italic>[name]</italic></green>");
+
+            return true;
+        }
+
+        public boolean GoHome(final Player player, final String[] args)
+        {
+            final UUID uuid = player.getUniqueId();
+
+            if (args.length < 2)
             {
-                players.sendPlayerMessage(player, "<green>Usage: /set-my-home [name]</green>");
+                if (homes.hasPlayerSetHomes(uuid)) players.sendPlayerMessage(player, homes.getPlayerHomesAsString(uuid));
+                else players.sendPlayerMessage(player, "<green>You have no homes yet. Set one first using <italic>/set-my-home</italic></green>");
             }
+
+            else if (args.length == 2)
+            {
+                if (homes.hasPlayerSetHomes(uuid))
+                {
+                    final String name = args[1].toLowerCase();
+
+                    if (homes.doesPlayerHomeExist(uuid, name))
+                    {
+                        // 1) Teleportation logic :)
+                        // 2) Effects logic :O
+                    }
+
+                    else players.sendPlayerMessage(player, "<red>You do not have a home named like that; try <italic>/list-homes</italic></red>");
+                }
+
+                else players.sendPlayerMessage(player, "<red>You do not have any set homes; set one using <italic>/set-my-home</italic></red>");
+            }
+
+            else players.sendPlayerMessage(player, "<green>Usage: /go-home <italic>[name]</italic></green>");
 
             return true;
         }
@@ -269,7 +315,7 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
         return switch (command.getName().toLowerCase())
         {
             case "home-help"    -> handlers.HomeHelp(player, args);
-            //case "go-home"      -> CommandHandlers.GoHome(player, args);
+            case "go-home"      -> handlers.GoHome(player, args);
             //case "list-homes"   -> CommandHandlers.ListHomes(player, args);
             //case "inspect-home" -> CommandHandlers.InspectHome(player, args);
             //case "delete-home"  -> CommandHandlers.DeleteHome(player, args);
