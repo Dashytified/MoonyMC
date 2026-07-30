@@ -1,9 +1,7 @@
 package md.dashworks;
 
 import md.dashworks.api.*;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -218,14 +216,35 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
                 final UUID uuid = player.getUniqueId();
 
                 if (homes.getPlayerHomesCount(uuid) >= 2 && !player.isOp()) players.sendPlayerMessage(player, "<red>You may not set any more homes.</red>");
-
                 else if (args[1].length() < 2) players.sendPlayerMessage(player, "<red>Your home name must be more than 2 characters long.</red>");
-
                 else if (args[1].length() > 12) players.sendPlayerMessage(player, "<red>Your home name may not be any longer than 12 characters.</red>");
+                else if (!homes.trySetPlayerHome(player, args[1])) players.sendPlayerMessage(player, "<red>Could not process the setting of the by you requested home.</red>");
 
-                else if (homes.trySetPlayerHome(player, args[1])) players.sendPlayerMessage(player, "<green>Your home has been set to your current location.</green>");
+                else
+                {
+                    players.sendPlayerMessage(player, "<green>Your home has been set to your current location.</green>");
 
-                else players.sendPlayerMessage(player, "<red>Could not process the setting of the by you requested home.</red>");
+                    final Location location = player.getLocation();
+                    final World world = location.getWorld();
+
+                    player.playSound(location, Sound.ENTITY_ENDER_DRAGON_DEATH, 1.0F, 1.0F);
+
+                    for (int a = 0; a < 3; a += 1)
+                    {
+                        double offset = (a - 2 / 2.0) * 0.6;
+
+                        for (int b = 0; b < 24; b += 1)
+                        {
+                            double angle = (2 * Math.PI * b) / 24;
+                            double x = Math.cos(angle) * 2;
+                            double z = Math.sin(angle) * 2;
+
+                            final Location spawnhere = player.getLocation().clone().add(x, offset, z);
+
+                            world.spawnParticle(Particle.TOTEM_OF_UNDYING, spawnhere, 1, 0, 0, 0, 0);
+                        }
+                    }
+                }
             }
 
             else
