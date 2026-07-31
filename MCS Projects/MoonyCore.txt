@@ -6,4 +6,6 @@ Jul 6th Mon 2026 - 12:45AM: I added color translation for player messaging for o
 
 Jul 23rd Thur 2026 - 3:09PM: Added members to the `MoonPlayers` components. Specifically for verifying UUIDs from configuration files. Other changes have been made too, nothing too significant, worth the note none the less.
 
+Jul 31st Fri 2026 - 2:57AM: Added helper functions for playing particles to player with overloads. Needed by `Haum Baum` likewise for the following update.
 
+Jul 31st Fri 2026 - 3:04AM: Added helper functions for playing sounds to player with overloads. As the above update mentions, this is necessary for `Haum Baum` :)
