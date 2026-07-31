@@ -12,4 +12,8 @@ Jul 23rd Thur 2026 - 3:40PM: Glad to announce the save and load functionality fo
 
 Jul 23rd Thur 2026 - 4:20PM: Have now written out the implementation for `/set-home`, this is some nice progress for now, do not want to spend too much time on progressing in regard to developing plugins, does not seem as rewarding as some of my other projects right now.
 
-Jul 30th Thur 2026 - 23:34PM: Went ahead and added effects/sound to the `/set-home` command. New to this kind of approach, used to using quite the linear approach in regard to summoning particles and entities, doing it mathematically proper for once. May wrap the logic into functions down the line if I need to reuse the logic. Next command on the list `/go-home` !
+Jul 30th Thur 2026 - 11:34PM: Went ahead and added effects/sound to the `/set-home` command. New to this kind of approach, used to using quite the linear approach in regard to summoning particles and entities, doing it mathematically proper for once. May wrap the logic into functions down the line if I need to reuse the logic. Next command on the list `/go-home` !
+
+Jul 31st Fri 2026 - 2:59AM: I need helper functions, as I speculated previously, so here they are! Yay.
+
+Jul 31st Fri 2026 - 3:05AM: `/go-home` has been added with fancy effects and the leveraging of features recently added to `Moony Core`

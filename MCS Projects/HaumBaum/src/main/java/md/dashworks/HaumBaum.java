@@ -13,20 +13,20 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
+class PlayerHome
+{
+    public String name;
+    public Location location;
+
+    public PlayerHome(final String name, final Location location)
+    {
+        this.name = name;
+        this.location = location;
+    }
+}
+
 class PlayerHomes
 {
-    private class PlayerHome
-    {
-        public String name;
-        public Location location;
-
-        public PlayerHome(final String name, final Location location)
-        {
-            this.name = name;
-            this.location = location;
-        }
-    }
-
     private final Map<UUID, List<PlayerHome>> homes = new HashMap<>(); // <--- need a separate class for this
 
     private final MoonConfiguration config = new MoonConfiguration();
@@ -161,6 +161,20 @@ class PlayerHomes
         return false;
     }
 
+    public PlayerHome getPlayerHomeByName(final UUID uuid, String name)
+    {
+        if (!hasPlayerSetHomes(uuid)) return null;
+
+        name = name.toLowerCase();
+
+        if (!doesPlayerHomeExist(uuid, name)) return null;
+
+        for (PlayerHome home : homes.get(uuid))
+            if (home.name.equalsIgnoreCase(name)) return home;
+
+        return null;
+    }
+
     public int getPlayerHomesCount(final UUID uuid) { return hasPlayerSetHomes(uuid) ? this.homes.get(uuid).size() : 0; }
 
     public boolean trySetPlayerHome(final Player player, final String name)
@@ -222,6 +236,8 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
     private class CommandHandlers
     {
         private final MoonPlayers players = new MoonPlayers();
+        private final MoonSounds sounds = new MoonSounds();
+        private final MoonEffects effects = new MoonEffects();
 
         public boolean HomeHelp(final Player player, final String[] args) { return instance.players.sendPlayerMessage(player, "<rainbow>/home-help  /go-home <italic>[name]</italic>  /list-homes  /inspect-home <italic>[player] [name | none]</italic>  /delete-home <italic>[name]</italic>  /set-my-home <italic>[name]</italic></rainbow>"); }
 
@@ -239,27 +255,8 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
                 else
                 {
                     players.sendPlayerMessage(player, "<green>Your home has been set to your current location.</green>");
-
-                    final Location location = player.getLocation();
-                    final World world = location.getWorld();
-
-                    player.playSound(location, Sound.ENTITY_ENDER_DRAGON_DEATH, 1.0F, 1.0F);
-
-                    for (int a = 0; a < 3; a += 1)
-                    {
-                        double offset = (a - 2 / 2.0) * 0.6;
-
-                        for (int b = 0; b < 24; b += 1)
-                        {
-                            double angle = (2 * Math.PI * b) / 24;
-                            double x = Math.cos(angle) * 2;
-                            double z = Math.sin(angle) * 2;
-
-                            final Location spawnhere = player.getLocation().clone().add(x, offset, z);
-
-                            world.spawnParticle(Particle.TOTEM_OF_UNDYING, spawnhere, 1, 0, 0, 0, 0);
-                        }
-                    }
+                    sounds.playSoundToPlayer(player, Sound.ENTITY_ENDER_DRAGON_DEATH);
+                    effects.playCircularParticlesForPlayer(player, 3, 24, Particle.TOTEM_OF_UNDYING);
                 }
             }
 
@@ -268,11 +265,15 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
             return true;
         }
 
+        private List<UUID> gohome_queue = new ArrayList<>();
+
         public boolean GoHome(final Player player, final String[] args)
         {
             final UUID uuid = player.getUniqueId();
 
-            if (args.length < 2)
+            if (gohome_queue.contains(uuid)) players.sendPlayerMessage(player, "<red>You already have a pending request, wait for it to be fulfilled.</red>");
+
+            else if (args.length < 2)
             {
                 if (homes.hasPlayerSetHomes(uuid)) players.sendPlayerMessage(player, homes.getPlayerHomesAsString(uuid));
                 else players.sendPlayerMessage(player, "<green>You have no homes yet. Set one first using <italic>/set-my-home</italic></green>");
@@ -282,12 +283,39 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
             {
                 if (homes.hasPlayerSetHomes(uuid))
                 {
-                    final String name = args[1].toLowerCase();
+                    final String name = args[1];
 
                     if (homes.doesPlayerHomeExist(uuid, name))
                     {
-                        // 1) Teleportation logic :)
-                        // 2) Effects logic :O
+                        final PlayerHome home = homes.getPlayerHomeByName(uuid, name);
+
+                        if (home != null)
+                        {
+                            final Location location = home.location;
+
+                            Bukkit.getScheduler().runTaskLater
+                            (
+                                HaumBaum.plugin, () ->
+                                {
+                                    if (player.isOnline())
+                                    {
+                                        player.teleport(location);
+
+                                        players.sendPlayerMessage(player, "<green><italic>Whoooooshhh</italic></green>");
+                                        sounds.playSoundToPlayer(player, Sound.ENTITY_PLAYER_LEVELUP);
+                                        effects.playCircularParticlesForPlayer(player, Particle.ENCHANT);
+                                    }
+
+                                    gohome_queue.remove(uuid);
+                                }, 20 * 5
+                            );
+
+                            gohome_queue.add(uuid);
+
+                            players.sendPlayerMessage(player, "<green>You will be teleported in 5 seconds ....</green>");
+                        }
+
+                        else players.sendPlayerMessage(player, "<red>An error occurred whilst trying to retrieve your home</red>");
                     }
 
                     else players.sendPlayerMessage(player, "<red>You do not have a home named like that; try <italic>/list-homes</italic></red>");
