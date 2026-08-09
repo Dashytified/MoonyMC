@@ -106,12 +106,10 @@ class PlayerHomes
                 final UUID uuid = entry.getKey();
                 final List<PlayerHome> homes = entry.getValue();
 
-                ConfigurationSection section = config.createSection("player-storage." + uuid.toString());
-
                 for (PlayerHome home : homes)
                 {
                     final String name = home.name;
-                    final String base = "player-storage." + uuid.toString() + "." + name + ".";
+                    final String base = "player-storage." + uuid + "." + name + ".";
 
                     config.set(base + "world-name", name);
 
@@ -140,9 +138,9 @@ class PlayerHomes
 
         final List<PlayerHome> homes = this.homes.get(uuid);
 
-        String homeString = "<green>Your homes: <italic>";
+        StringBuilder homeString = new StringBuilder("<green>Your homes: <italic>");
 
-        for (PlayerHome home : homes) homeString += home.name + "  ";
+        for (PlayerHome home : homes) homeString.append(home.name).append("  ");
 
         return homeString + "</italic></green>";
     }
@@ -328,6 +326,16 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
 
             return true;
         }
+
+        public boolean ListHomes(final Player player, final String[] args)
+        {
+            final UUID uuid = player.getUniqueId();
+
+            if (homes.hasPlayerSetHomes(uuid)) players.sendPlayerMessage(player, homes.getPlayerHomesAsString(uuid));
+            else players.sendPlayerMessage(player, "<red>You do not have any set homes; set one using <italic>/set-my-home</italic></red>");
+
+            return true;
+        }
     }
 
     private final MoonPlayers players = new MoonPlayers();
@@ -344,7 +352,7 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
         {
             case "home-help"    -> handlers.HomeHelp(player, args);
             case "go-home"      -> handlers.GoHome(player, args);
-            //case "list-homes"   -> CommandHandlers.ListHomes(player, args);
+            case "list-homes"   -> handlers.ListHomes(player, args);
             //case "inspect-home" -> CommandHandlers.InspectHome(player, args);
             //case "delete-home"  -> CommandHandlers.DeleteHome(player, args);
             case "set-my-home"  -> handlers.SetMyHome(player, args);
