@@ -336,6 +336,53 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
 
             return true;
         }
+
+        public boolean InspectHome(final Player player, final String[] args)
+        {
+            if (player.isOp())
+            {
+                final UUID uuid = player.getUniqueId();
+
+                if (homes.hasPlayerSetHomes(uuid))
+                {
+                    final UUID target = Bukkit.getPlayerUniqueId(args[0]);
+
+                    if (target != null)
+                    {
+                        if (args.length == 2)
+                        {
+                            if (homes.doesPlayerHomeExist(target, args[1]))
+                            {
+                                final PlayerHome home = homes.getPlayerHomeByName(target, args[1]);
+
+                                players.sendPlayerMessage(player, "<green>Name: <italic>" + home.name + "</italic></green>");
+
+                                final Location location = home.location;
+
+                                players.sendPlayerMessage(player, "<green>World: <italic>" + location.getWorld().getName() + "</italic></green>\n<green>@X: <italic>" + location.x() + "</italic></green>\n<green>@Y: <italic>" + location.y() + "</italic></green>\n<green>@Z: <italic>" + location.z() + "</italic></green>");
+                            }
+
+                            else players.sendPlayerMessage(player, "<red>Player does not have a home by that name.</red>");
+                        }
+
+                        else if (args.length == 1)
+                        {
+                            players.sendPlayerMessage(player, homes.getPlayerHomesAsString(target));
+                        }
+
+                        else players.sendPlayerMessage(player, "<green>Usage: /inspect-home <italic>[player] <home></italic></green>");
+                    }
+
+                    else players.sendPlayerMessage(player, "<red>That player is not online.</red>");
+                }
+
+                else players.sendPlayerMessage(player, "<red>That player has not set any homes, yet.</red>");
+            }
+
+            else players.sendPlayerMessage(player, "<red>You may not do that.</red>");
+
+            return true;
+        }
     }
 
     private final MoonPlayers players = new MoonPlayers();
@@ -353,7 +400,7 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
             case "home-help"    -> handlers.HomeHelp(player, args);
             case "go-home"      -> handlers.GoHome(player, args);
             case "list-homes"   -> handlers.ListHomes(player, args);
-            //case "inspect-home" -> CommandHandlers.InspectHome(player, args);
+            case "inspect-home" -> handlers.InspectHome(player, args);
             //case "delete-home"  -> CommandHandlers.DeleteHome(player, args);
             case "set-my-home"  -> handlers.SetMyHome(player, args);
             default             -> true;
