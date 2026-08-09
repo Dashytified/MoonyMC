@@ -22,7 +22,7 @@ commands:
     aliases: [homes, listhomes, homelist, listingofhomes]
 
   inspect-home:
-    aliases: [seehome, viewhome, homeof, seehomes]
+    aliases: [seehome, viewhome, homeof, seehomes, inspecthome]
 
   delete-home:
     aliases: [delhome, deletehome, delmyhome, dhome]

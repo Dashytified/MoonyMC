@@ -111,10 +111,10 @@ class PlayerHomes
                     final String name = home.name;
                     final String base = "player-storage." + uuid + "." + name + ".";
 
-                    config.set(base + "world-name", name);
-
                     final Location location = home.location;
+                    final World world = location.getWorld();
 
+                    config.set(base + "world-name", world.getName());
                     config.set(base + "world-x",  location.getX());
                     config.set(base + "world-y",  location.getY());
                     config.set(base + "world-z",  location.getZ());
@@ -175,21 +175,54 @@ class PlayerHomes
 
     public int getPlayerHomesCount(final UUID uuid) { return hasPlayerSetHomes(uuid) ? this.homes.get(uuid).size() : 0; }
 
-    public boolean trySetPlayerHome(final Player player, final String name)
+    public boolean trySetPlayerHome(final Player player, String name)
     {
         try
         {
-            if (name == null) return false;
+            if (name != null)
+            {
+                name = name.toLowerCase();
 
-           final String treated = name.trim().replaceAll("[^A-Za-z0-9_-]", "");
+                final String treated = name.trim().replaceAll("[^A-Za-z0-9_-]", "");
 
-            if (treated.isEmpty()) return false;
+                if (!treated.isEmpty())
+                {
+                    final UUID uuid = player.getUniqueId();
+                    final Location location = player.getLocation();
+                    final PlayerHome home = new PlayerHome(treated, location);
 
-            final UUID uuid = player.getUniqueId();
-            final Location location = player.getLocation();
-            final PlayerHome home = new PlayerHome(name.toLowerCase(), location);
+                    homes.computeIfAbsent(uuid, x -> new ArrayList<>()).add(home);
+                }
 
-            homes.computeIfAbsent(uuid, x -> new ArrayList<>()).add(home);
+                else return false;
+            }
+
+            else return false;
+        }
+
+        catch (Exception e)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public boolean deleteHome(final UUID uuid, String name)
+    {
+        try
+        {
+            if (homes.containsKey(uuid) && name != null)
+            {
+                name = name.toLowerCase();
+
+                final String treated = name.trim().replaceAll("[^A-Za-z0-9_-]", "");
+
+                if (!treated.isEmpty()) homes.get(uuid).removeIf(home -> home.name.equals(treated));
+                else return false;
+            }
+
+            else return false;
         }
 
         catch (Exception e)
@@ -221,14 +254,14 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
         getCommand("delete-home" ).setExecutor(this);
         getCommand("set-my-home" ).setExecutor(this);
 
-        getLogger().info("Plugin has bee enabled :)");
+        getLogger().info("Haum Baum has been enabled :)");
     }
 
     @Override public void onDisable()
     {
         homes.savePlayerHomes(this);
 
-        getLogger().warning("Plugin has been disabled, unfortunately :(");
+        getLogger().warning("Haum Baum has been disabled, unfortunately :(");
     }
 
     private class CommandHandlers
@@ -241,14 +274,14 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
 
         public boolean SetMyHome(final Player player, final String[] args)
         {
-            if (args.length != 2)
+            if (args.length == 1)
             {
                 final UUID uuid = player.getUniqueId();
 
                 if (homes.getPlayerHomesCount(uuid) >= 2 && !player.isOp()) players.sendPlayerMessage(player, "<red>You may not set any more homes.</red>");
-                else if (args[1].length() < 2) players.sendPlayerMessage(player, "<red>Your home name must be more than 2 characters long.</red>");
-                else if (args[1].length() > 12) players.sendPlayerMessage(player, "<red>Your home name may not be any longer than 12 characters.</red>");
-                else if (!homes.trySetPlayerHome(player, args[1])) players.sendPlayerMessage(player, "<red>Could not process the setting of the by you requested home.</red>");
+                else if (args[0].length() < 2) players.sendPlayerMessage(player, "<red>Your home name must be more than 2 characters long.</red>");
+                else if (args[0].length() > 12) players.sendPlayerMessage(player, "<red>Your home name may not be any longer than 12 characters.</red>");
+                else if (!homes.trySetPlayerHome(player, args[0])) players.sendPlayerMessage(player, "<red>Could not process the setting of the by you requested home.</red>");
 
                 else
                 {
@@ -271,21 +304,19 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
 
             if (gohome_queue.contains(uuid)) players.sendPlayerMessage(player, "<red>You already have a pending request, wait for it to be fulfilled.</red>");
 
-            else if (args.length < 2)
+            else if (args.length == 0)
             {
                 if (homes.hasPlayerSetHomes(uuid)) players.sendPlayerMessage(player, homes.getPlayerHomesAsString(uuid));
                 else players.sendPlayerMessage(player, "<green>You have no homes yet. Set one first using <italic>/set-my-home</italic></green>");
             }
 
-            else if (args.length == 2)
+            else if (args.length == 1)
             {
                 if (homes.hasPlayerSetHomes(uuid))
                 {
-                    final String name = args[1];
-
-                    if (homes.doesPlayerHomeExist(uuid, name))
+                    if (homes.doesPlayerHomeExist(uuid, args[0]))
                     {
-                        final PlayerHome home = homes.getPlayerHomeByName(uuid, name);
+                        final PlayerHome home = homes.getPlayerHomeByName(uuid, args[0]);
 
                         if (home != null)
                         {
@@ -365,10 +396,7 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
                             else players.sendPlayerMessage(player, "<red>Player does not have a home by that name.</red>");
                         }
 
-                        else if (args.length == 1)
-                        {
-                            players.sendPlayerMessage(player, homes.getPlayerHomesAsString(target));
-                        }
+                        else if (args.length == 1) players.sendPlayerMessage(player, homes.getPlayerHomesAsString(target));
 
                         else players.sendPlayerMessage(player, "<green>Usage: /inspect-home <italic>[player] <home></italic></green>");
                     }
@@ -381,6 +409,35 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
 
             else players.sendPlayerMessage(player, "<red>You may not do that.</red>");
 
+            return true;
+        }
+
+        public boolean DeleteHome(final Player player, final String[] args)
+        {
+            final UUID uuid = player.getUniqueId();
+
+            if (homes.hasPlayerSetHomes(uuid))
+            {
+                if (args.length == 1)
+                {
+                    if (homes.doesPlayerHomeExist(uuid, args[0]))
+                    {
+                        if (homes.deleteHome(uuid, args[0]))
+                        {
+                            players.sendPlayerMessage(player, "<green>Your home was removed.</green>");
+                            sounds.playSoundToPlayer(player, Sound.ENTITY_ENDER_DRAGON_DEATH);
+                        }
+
+                        else players.sendPlayerMessage(player, "<red>Could not remove your home.</red>");
+                    }
+
+                    else players.sendPlayerMessage(player, homes.getPlayerHomesAsString(uuid));
+                }
+
+                else players.sendPlayerMessage(player, "<green>Usage: /delete-home <italic>[name]</italic></green>");
+            }
+
+            else players.sendPlayerMessage(player, "<red>You do not have any set homes; set one using <italic>/set-my-home</italic></red>");
             return true;
         }
     }
@@ -401,7 +458,7 @@ public final class HaumBaum extends JavaPlugin implements CommandExecutor
             case "go-home"      -> handlers.GoHome(player, args);
             case "list-homes"   -> handlers.ListHomes(player, args);
             case "inspect-home" -> handlers.InspectHome(player, args);
-            //case "delete-home"  -> CommandHandlers.DeleteHome(player, args);
+            case "delete-home"  -> handlers.DeleteHome(player, args);
             case "set-my-home"  -> handlers.SetMyHome(player, args);
             default             -> true;
         };

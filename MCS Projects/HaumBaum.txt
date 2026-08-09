@@ -17,3 +17,7 @@ Jul 30th Thur 2026 - 11:34PM: Went ahead and added effects/sound to the `/set-ho
 Jul 31st Fri 2026 - 2:59AM: I need helper functions, as I speculated previously, so here they are! Yay.
 
 Jul 31st Fri 2026 - 3:05AM: `/go-home` has been added with fancy effects and the leveraging of features recently added to `Moony Core`
+
+Augy 9th Sun 2026 - 11:59PM: All the remaining commands have been added, now the testing phase begins. A nice few hundred lines of code to favour the creation that is the `Moony Core` empire! :)
+
+Augy 10th Moon 2026 - 12:25PM: Testing has concluded, bugs have been patched, pushing the final build now. I may come back before truly marking it as stable.
