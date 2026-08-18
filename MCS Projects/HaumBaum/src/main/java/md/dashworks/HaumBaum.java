@@ -13,6 +13,13 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
+// NOW:
+// - Change messages to mention the home name set
+// - Instead of whoosh, some more decorative messaging for teleportation
+// - Ops get instant teleport
+// - Only play sound/particles IF not already
+
+
 class PlayerHome
 {
     public String name;
