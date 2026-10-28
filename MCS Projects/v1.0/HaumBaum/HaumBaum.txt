@@ -1,0 +1,23 @@
+Information: This plugin allows players to use commands like `/home` and `/sethome` with the intent to make travel more convenient, it also comes with various enhancement ordinary plugins overlook. C++ has made me necessary to do so.
+
+Jun 18th Thurs 2026 - 12:27AM: This marks the start of a new project, namely `HaumBaum`. This project will act as a gateway to a cascade of features that will be used across the Minecraft server it is made for. First session of working on this project shall entail the preparing of command handling for my future self.
+
+Jun 18th Thurs 2026 - 1:13AM: I have successfully prepared the project for my next session. I also created a template for future Minecraft projects, was first asking AI to help me navigate the landscape of IntelliJ's many settings, eventually I found it, hidden in a corner somewhere. The next session will entail progress in two regards, first off the `Formatting` API for handling text messaging, colours, interpolation etc. Then secondly the `Configuration` API will be of a concern to me because I want to take the opportunity to thoroughly develop these modules when I am first met with the need to do so. Given the portability of Java code, I believe it does not matter if Minecraft goes up a version of two. I do not rely on unnecessary third-parties, C++ taught me that. On that note, Java has been quite intriguing, with how extremely easy it is to do things, does make me wonder about the lessening of synaptic potentiation. Variability the remedy.
+
+Jun 22th Mon 2026 - 1:02AM: I am proud to announce I have officially started developing the necessary `MoonyCore` API, which yet again, entails the start of yet another project. Still figuring out my workflow as there simply are a lot of variables to deal with, I managed to build working binaries already.
+
+Jul 9th Thur 2026 - 12:31AM: Today I bring nothing too significant for this beautiful project on first sight, but when considering the broader cascade of effects it plays into, it is indeed quite a synergy you are looking at. I created one function for the project, this implementation really just shows how easy it can be to write code, having been preoccupied with C++ code, this feels like I do not even have to think. It is pleasant, but also a reason why the regions of the brain involved quickly become redundant to the system operating them.
+
+Jul 23rd Thur 2026 - 3:40PM: Glad to announce the save and load functionality for configuration has been implemented. It has been literal years since I last wrote it out, this time, properly. It should work as it is, but I have not yet compiled it nor tried the plugin on the server for that matter. The IDE does however not throw any errors for the relevant code. It does obviously pick up on the errors at the bottom of the primary source file `HaumBaum.java` because I have yet to implement those snippets.
+
+Jul 23rd Thur 2026 - 4:20PM: Have now written out the implementation for `/set-home`, this is some nice progress for now, do not want to spend too much time on progressing in regard to developing plugins, does not seem as rewarding as some of my other projects right now.
+
+Jul 30th Thur 2026 - 11:34PM: Went ahead and added effects/sound to the `/set-home` command. New to this kind of approach, used to using quite the linear approach in regard to summoning particles and entities, doing it mathematically proper for once. May wrap the logic into functions down the line if I need to reuse the logic. Next command on the list `/go-home` !
+
+Jul 31st Fri 2026 - 2:59AM: I need helper functions, as I speculated previously, so here they are! Yay.
+
+Jul 31st Fri 2026 - 3:05AM: `/go-home` has been added with fancy effects and the leveraging of features recently added to `Moony Core`
+
+Augy 9th Sun 2026 - 11:59PM: All the remaining commands have been added, now the testing phase begins. A nice few hundred lines of code to favour the creation that is the `Moony Core` empire! :)
+
+Augy 10th Moon 2026 - 12:25PM: Testing has concluded, bugs have been patched, pushing the final build now. I may come back before truly marking it as stable.
